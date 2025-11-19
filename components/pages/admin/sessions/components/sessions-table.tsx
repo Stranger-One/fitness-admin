@@ -147,6 +147,7 @@ export function SessionsTable({
         }
       );
 
+      console.log("sortedSessions", sortedSessions);
       setSessions(sortedSessions);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -211,6 +212,7 @@ export function SessionsTable({
   const handleConfirmEdit = (data: Partial<Session>) => {
     if (selectedSession) {
       onEdit(selectedSession.id, data);
+      fetchSessions();
       setEditModalOpen(false);
       setSelectedSession(null);
     }
@@ -349,6 +351,7 @@ export function SessionsTable({
                       session.status.slice(1)}
                   </div>
                 </TableCell>
+
                 <TableCell>
                   {session.status !== "completed" &&
                     session.status !== "requested" &&

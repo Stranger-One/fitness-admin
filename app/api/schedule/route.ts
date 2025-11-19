@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       where: whereClause,
       include: {
         user: { select: { name: true, image: true } },
-        trainer: { select: { name: true, image: true } },
+        trainer: { select: { name: true, image: true, id: true } },
       },
       skip,
       take: limit,

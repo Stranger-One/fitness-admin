@@ -66,6 +66,7 @@ export default function Sessions() {
 
   const handleEditSession = async (id: string, data: Partial<Session>) => {
     try {
+      console.log("update session data: ", data)
       const response = await fetch(`/api/schedule/${id}`, {
         method: "PUT",
         headers: {
@@ -73,6 +74,7 @@ export default function Sessions() {
         },
         body: JSON.stringify(data),
       })
+      console.log("update session response: ", await response.json())
       if (response.ok) {
         fetchStats()
         toast.success("Session updated successfully")

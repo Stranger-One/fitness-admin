@@ -1,41 +1,53 @@
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 interface Session {
-  id: string
-  date: string
-  startTime: string
-  endTime: string
-  scheduleSubject: string
-  scheduleLink?: string
-  status: string
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  scheduleSubject: string;
+  scheduleLink?: string;
+  status: string;
   trainer: {
-    name: string,
-    id: string
-  }
+    name: string;
+    id: string;
+  };
 }
 
 interface EditSessionModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: (data: Partial<Session>) => void
-  session: Session | null
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (data: Partial<Session>) => void;
+  session: Session | null;
 }
 
-export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSessionModalProps) {
-  const [formData, setFormData] = useState<Partial<Session>>({})
-  const [trainer, setTrainers] = useState<string[]>([])
-  const statuses = ["pending", "completed"]
+export function EditSessionModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  session,
+}: EditSessionModalProps) {
+  const [formData, setFormData] = useState<Partial<Session>>({});
+  const [trainers, setTrainers] = useState<string[]>([]);
+  const statuses = ["pending", "completed"];
+
   useEffect(() => {
     if (session) {
       setFormData({
@@ -45,30 +57,40 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
         scheduleSubject: session.scheduleSubject,
         trainer: session.trainer,
         status: session.status,
-        scheduleLink: session.scheduleLink
-      })
-      console.log(session)
+        scheduleLink: session.scheduleLink,
+      });
+      console.log(session);
     }
+
     const fetchTrainers = async () => {
       try {
-        const response = await fetch('/api/users/trainers')
-        const data = await response.json()
-        setTrainers(data)
+        const response = await fetch("/api/users/trainers");
+        const data = await response.json();
+        console.log("fetchTrainers", data);
+        console.log("formData", formData, session);
+        setTrainers(data);
       } catch (error) {
-        console.error('Error fetching trainers:', error)
+        console.error("Error fetching trainers:", error);
       }
-    }
-    fetchTrainers()
-  }, [session])
+    };
+    fetchTrainers();
+  }, [session]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // console.log(formData)
-    const { date, startTime, endTime, scheduleSubject, trainer, status, scheduleLink } = formData
+    e.preventDefault();
+    const {
+      date,
+      startTime,
+      endTime,
+      scheduleSubject,
+      trainer,
+      status,
+      scheduleLink,
+    } = formData;
     if (!trainer) return;
     const updatedData = {
       date: new Date(date as string).toISOString(),
@@ -77,11 +99,10 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
       scheduleSubject,
       trainerId: trainer.id,
       status: status,
-      scheduleLink: scheduleLink
-    }
-    onConfirm(updatedData)
-    // console.log()
-  }
+      scheduleLink: scheduleLink,
+    };
+    onConfirm(updatedData);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -131,45 +152,48 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="scheduleSubject" className="text-right">
+              <Label htmlFor="trainer" className="text-right">
                 Trainer
               </Label>
               <Select
-              // defaultValue={session?.trainer.name}
-              onValueChange={(e: string) => setFormData({ ...formData, trainer: {id: e, name: ""} })}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select Trainer" />
-              </SelectTrigger>
-              <SelectContent>
-              {trainer.map((trainer: any) => (
-                        <SelectItem key={trainer.id} value={trainer.id}>
-                          {trainer.name} {`(${trainer.email})`}
-                        </SelectItem>
-                      ))}
-              </SelectContent>
-            </Select>
-
-            <Label htmlFor="scheduleSubject" className="text-right">
+                value={formData.trainer?.id || ""}
+                onValueChange={(e: string) =>
+                  setFormData({ ...formData, trainer: { id: e, name: "" } })
+                }
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select Trainer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {trainers.map((trainer: any) => (
+                    <SelectItem key={trainer.id} value={trainer.id}>
+                      {trainer.name} {`(${trainer.email})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
                 Status
               </Label>
-
               <Select
-              // defaultValue={"requested"}
-              onValueChange={(e: string) => setFormData({ ...formData, status: e })}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-              {statuses.map((item: any) => (
-                        <SelectItem key={item} value={item}>
-                          {item}
-                        </SelectItem>
-                      ))}
-              </SelectContent>
-            </Select>
-
+                value={formData.status || ""}
+                onValueChange={(e: string) =>
+                  setFormData({ ...formData, status: e })
+                }
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((item: any) => (
+                    <SelectItem key={item} value={item}>
+                      {item}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="scheduleLink" className="text-right">
@@ -206,5 +230,5 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
