@@ -85,12 +85,12 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-center w-full py-10">
                     <Loader2 className="h-5 w-5 animate-spin text-white" />
                   </div>
-                ) : trainers.length === 0 ? (
+                ) : trainers?.length === 0 ? (
                   <div className="flex items-center justify-center w-full py-10 text-white">
                     <p>No trainers found.</p>
                   </div>
                 ) : (
-                  trainers.map((trainer) => (
+                  trainers?.map((trainer) => (
                     <div
                       key={trainer.name}
                       className="flex items-center justify-between"
