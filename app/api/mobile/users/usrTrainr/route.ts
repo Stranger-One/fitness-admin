@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { authMiddleware } from "@/middleware";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         name: true,
-        trainer: true
+        trainer: true,
       },
     });
 

@@ -1,42 +1,42 @@
-import { authOptions } from "@/lib/auth.config"
-import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { type NextRequest, NextResponse } from "next/server"
+import { authOptions } from "@/lib/auth.config";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { type NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 type RouteContext = {
-    params: Promise<{
-        userId: string
-    }>
-  }
+  params: Promise<{
+    userId: string;
+  }>;
+};
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session || session.user.role !== "TRAINER") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { userId } = await context.params
-    const { currentProgress, notes } = await request.json()
+    const { userId } = await context.params;
+    const { currentProgress, notes } = await request.json();
 
-    let status: "IN_PROGRESS" | "NEAR_COMPLETE" | "COMPLETED"
-    let wideStatus: "ACTIVE" | "INACTIVE"
+    let status: "IN_PROGRESS" | "NEAR_COMPLETE" | "COMPLETED";
+    let wideStatus: "ACTIVE" | "INACTIVE";
 
     if (currentProgress >= 0 && currentProgress <= 80) {
-      status = "IN_PROGRESS"
+      status = "IN_PROGRESS";
     } else if (currentProgress > 80 && currentProgress < 100) {
-      status = "NEAR_COMPLETE"
+      status = "NEAR_COMPLETE";
     } else {
-      status = "COMPLETED"
+      status = "COMPLETED";
     }
 
     if (currentProgress > 0 && currentProgress < 100) {
-      wideStatus = "ACTIVE"
+      wideStatus = "ACTIVE";
     } else {
-      wideStatus = "INACTIVE"
+      wideStatus = "INACTIVE";
     }
 
     const updatedProgram = await prisma.program.upsert({
@@ -54,11 +54,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         wideStatus,
         notes,
       },
-    })
+    });
 
-    return NextResponse.json(updatedProgram)
+    return NextResponse.json(updatedProgram);
   } catch (error) {
-    console.error("Error updating program:", error)
-    return NextResponse.json({ error: "An error occurred while updating the program" }, { status: 500 })
+    console.error("Error updating program:", error);
+    return NextResponse.json(
+      { error: "An error occurred while updating the program" },
+      { status: 500 }
+    );
   }
 }

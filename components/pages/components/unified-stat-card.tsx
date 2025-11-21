@@ -1,16 +1,24 @@
-import { type LucideIcon } from 'lucide-react'
-import { Card, CardContent } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { Loader2, type LucideIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface UnifiedStatCardProps {
-  icon: LucideIcon
-  title: string
-  value: string | number
-  trend?: string
-  className?: string
+  icon: LucideIcon;
+  title: string;
+  value: string | number;
+  trend?: string;
+  className?: string;
+  loader?: boolean;
 }
 
-export function UnifiedStatCard({ icon: Icon, title, value, trend, className }: UnifiedStatCardProps) {
+export function UnifiedStatCard({
+  icon: Icon,
+  title,
+  value,
+  trend,
+  className,
+  loader,
+}: UnifiedStatCardProps) {
   return (
     <Card className={cn("text-white", className)}>
       <CardContent className="flex items-center gap-4 p-6">
@@ -20,7 +28,11 @@ export function UnifiedStatCard({ icon: Icon, title, value, trend, className }: 
         <div className="space-y-1">
           <p className="text-sm font-medium">{title}</p>
           <div className="flex items-center gap-2">
-            <p className="text-2xl font-bold">{value}</p>
+            {loader ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <p className="text-2xl font-bold">{value}</p>
+            )}
             {trend && (
               <span className="text-sm font-medium text-emerald-500">
                 {trend}
@@ -30,5 +42,5 @@ export function UnifiedStatCard({ icon: Icon, title, value, trend, className }: 
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

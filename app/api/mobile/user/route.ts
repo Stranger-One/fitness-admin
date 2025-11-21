@@ -4,7 +4,7 @@ import type { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { authMiddleware } from "@/middleware";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
@@ -97,7 +97,10 @@ export async function DELETE(request: NextRequest) {
       where: { id: decoded.id },
     });
 
-    return NextResponse.json({ message: "User deleted successfully" }, {status: 200});
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }

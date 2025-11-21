@@ -5,8 +5,8 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import FacebookProvider from "next-auth/providers/facebook"
 import InstagramProvider from "next-auth/providers/instagram"
 import bcrypt from "bcryptjs"
+import prisma from "./prisma"
 
-const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),

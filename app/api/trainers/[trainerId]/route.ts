@@ -1,29 +1,29 @@
-import { authOptions } from "@/lib/auth.config"
-import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { authOptions } from "@/lib/auth.config";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 type RouteContext = {
   params: Promise<{
-    trainerId: string
-  }>
-}
+    trainerId: string;
+  }>;
+};
 
-export async function PUT(
-  request: Request,
-  context: RouteContext
-) {
+export async function PUT(request: Request, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    if (
+      !session ||
+      (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN")
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { trainerId } = await context.params
-    const { name, email, specialization, status, image } = await request.json()
+    const { trainerId } = await context.params;
+    const { name, email, specialization, status, image } = await request.json();
 
     const updatedTrainer = await prisma.user.update({
       where: { id: trainerId },
@@ -34,39 +34,45 @@ export async function PUT(
         specialization,
         status,
       },
-    })
+    });
 
-    return NextResponse.json(updatedTrainer)
+    return NextResponse.json(updatedTrainer);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "An unknown error occurred" },
+      {
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      },
       { status: 500 }
-    )
+    );
   }
 }
 
-export async function DELETE(
-  request: Request,
-  context: RouteContext
-) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    if (
+      !session ||
+      (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN")
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { trainerId } = await context.params
+    const { trainerId } = await context.params;
 
     await prisma.user.delete({
       where: { id: trainerId },
-    })
+    });
 
-    return NextResponse.json({ message: "Trainer deleted successfully" })
+    return NextResponse.json({ message: "Trainer deleted successfully" });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "An unknown error occurred" },
+      {
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      },
       { status: 500 }
-    )
+    );
   }
 }

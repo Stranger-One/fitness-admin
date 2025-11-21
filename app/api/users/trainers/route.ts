@@ -1,35 +1,43 @@
-import { authOptions } from "@/lib/auth.config"
-import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { authOptions } from "@/lib/auth.config";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
-    if (!session || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "TRAINER")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    if (
+      !session ||
+      (session.user.role !== "ADMIN" &&
+        session.user.role !== "SUPER_ADMIN" &&
+        session.user.role !== "TRAINER")
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const trainers = await prisma.user.findMany({
       where: {
-        role: "TRAINER"
+        role: "TRAINER",
       },
       select: {
         id: true,
         name: true,
         email: true,
-        image: true
-      }
-    })
+        image: true,
+      },
+    });
 
-    return NextResponse.json(trainers)
+    return NextResponse.json(trainers);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "An unknown error occurred" },
+      {
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      },
       { status: 500 }
-    )
+    );
   }
 }

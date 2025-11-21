@@ -1,21 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Users, UserCheck, UserPlus, UserX } from 'lucide-react'
-import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
-import { useAdminContext } from '@/context/admin'
+import { useEffect, useState } from "react";
+import { Users, UserCheck, UserPlus, UserX } from "lucide-react";
+import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card";
+import { useAdminContext } from "@/context/admin";
 
 export interface UserStats {
-  totalUsers: number
-  activeUsers: number
-  newUsers: number
-  inactiveUsers: number
+  totalUsers: number;
+  activeUsers: number;
+  newUsers: number;
+  inactiveUsers: number;
 }
 
 export function StatsCards() {
-  const {
-    userStats: stats
-  } = useAdminContext()
+  const { loader, userStats: stats } = useAdminContext();
 
   const statCards = [
     {
@@ -42,13 +40,23 @@ export function StatsCards() {
       icon: UserX,
       className: "bg-purple-600 dark:bg-purple-700",
     },
-  ]
+  ];
+
+  if (loader) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((stat) => (
+          <UnifiedStatCard key={stat.title} {...stat} loader={true} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statCards.map((stat) => (
-        <UnifiedStatCard key={stat.title} {...stat} />
+        <UnifiedStatCard key={stat.title} {...stat} loader={false} />
       ))}
     </div>
-  )
+  );
 }

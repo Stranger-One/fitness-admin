@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { JwtPayload } from "jsonwebtoken";
 import { authMiddleware } from "@/middleware";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function PUT(request: NextRequest) {
   try {
@@ -17,10 +17,10 @@ export async function PUT(request: NextRequest) {
     const user = await prisma.user.update({
       where: { id: decoded.id },
       data: {
-        phone
+        phone,
       },
     });
-    return NextResponse.json({ user }, {status: 200});
+    return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }

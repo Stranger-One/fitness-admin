@@ -1,24 +1,24 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth.config"
+import { type NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth.config";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 type RouteContext = {
   params: Promise<{
-    chatId: string
-  }>
-}
+    chatId: string;
+  }>;
+};
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { chatId } = await context.params
+  const { chatId } = await context.params;
 
   try {
     const chat = await prisma.chat.findUnique({
@@ -48,15 +48,18 @@ export async function GET(request: NextRequest, context: RouteContext) {
           },
         },
       },
-    })
+    });
 
     if (!chat) {
-      return NextResponse.json({ error: "Chat not found" }, { status: 404 })
+      return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ chat })
+    return NextResponse.json({ chat });
   } catch (error) {
-    console.error("Error fetching chat:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error fetching chat:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

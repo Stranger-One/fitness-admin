@@ -1,16 +1,16 @@
-import { authMiddleware } from "@/middleware"
-import { PrismaClient } from "@prisma/client"
-import type { JwtPayload } from "jsonwebtoken"
-import { type NextRequest, NextResponse } from "next/server"
+import { authMiddleware } from "@/middleware";
+import { PrismaClient } from "@prisma/client";
+import type { JwtPayload } from "jsonwebtoken";
+import { type NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
     const decoded = (await authMiddleware(request)) as JwtPayload & {
-      id: string
-      role: string
-    }
+      id: string;
+      role: string;
+    };
 
     const upcomingSchedules = await prisma.schedule.findMany({
       where: {
@@ -38,11 +38,14 @@ export async function GET(request: NextRequest) {
       orderBy: {
         startTime: "asc",
       },
-    })
+    });
 
-    return NextResponse.json({ schedules: upcomingSchedules })
+    return NextResponse.json({ schedules: upcomingSchedules });
   } catch (error) {
-    console.error("Error fetching upcoming schedules:", error)
-    return NextResponse.json({ error: "Failed to fetch upcoming schedules" }, { status: 500 })
+    console.error("Error fetching upcoming schedules:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch upcoming schedules" },
+      { status: 500 }
+    );
   }
 }

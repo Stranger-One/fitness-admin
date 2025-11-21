@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import type { JwtPayload } from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 type RouteContext = {
   params: Promise<{
@@ -89,7 +89,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (messagesCount === 1) {
       await prisma.message.create({
         data: {
-          content: "Welcome to Fitness Evolution — where your transformation begins.",
+          content:
+            "Welcome to Fitness Evolution — where your transformation begins.",
           chatId,
           senderId: trainerId,
         },

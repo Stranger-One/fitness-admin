@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.config";
 import { google } from "googleapis";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/calendar",
@@ -27,7 +27,7 @@ interface TokenResponse {
 
 async function saveTokens(tokens: TokenResponse) {
   const promises = [];
-  
+
   promises.push(
     prisma.systemConfig.upsert({
       where: { key: "GOOGLE_ACCESS_TOKEN" },
@@ -51,7 +51,10 @@ async function saveTokens(tokens: TokenResponse) {
       prisma.systemConfig.upsert({
         where: { key: "GOOGLE_TOKEN_EXPIRY" },
         update: { value: tokens.expiry_date.toString() },
-        create: { key: "GOOGLE_TOKEN_EXPIRY", value: tokens.expiry_date.toString() },
+        create: {
+          key: "GOOGLE_TOKEN_EXPIRY",
+          value: tokens.expiry_date.toString(),
+        },
       })
     );
   }
@@ -71,15 +74,15 @@ async function getTokens(): Promise<TokenResponse> {
   }
 
   const expiryDate = tokenExpiry ? parseInt(tokenExpiry.value) : 0;
-  
+
   if (Date.now() + TOKEN_EXPIRY_BUFFER >= expiryDate) {
     try {
       oauth2Client.setCredentials({
         refresh_token: refreshToken.value,
       });
-      
+
       const { credentials } = await oauth2Client.refreshAccessToken();
-      
+
       await saveTokens({
         access_token: credentials.access_token as string,
         refresh_token: credentials.refresh_token ?? undefined,
@@ -105,22 +108,24 @@ async function getTokens(): Promise<TokenResponse> {
 
 type RouteContext = {
   params: Promise<{
-    scheduleId: string
-  }>
-}
+    scheduleId: string;
+  }>;
+};
 
-export async function POST(
-  request: Request,
-  context: RouteContext
-) {
+export async function POST(request: Request, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "TRAINER")) {
+    if (
+      !session?.user ||
+      (session.user.role !== "ADMIN" &&
+        session.user.role !== "SUPER_ADMIN" &&
+        session.user.role !== "TRAINER")
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { scheduleId } = await context.params
+    const { scheduleId } = await context.params;
 
     const schedule = await prisma.schedule.findUnique({
       where: { id: scheduleId },
@@ -128,7 +133,10 @@ export async function POST(
     });
 
     if (!schedule) {
-      return NextResponse.json({ error: "Schedule not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Schedule not found" },
+        { status: 404 }
+      );
     }
 
     let tokens: TokenResponse;

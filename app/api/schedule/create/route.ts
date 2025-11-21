@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const [user, trainer] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       prisma.user.findUnique({ where: { id: trainerId } }),
-    ])
+    ]);
 
     const schedule = await prisma.schedule.create({
       data: {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         userId,
         trainerId,
       },
-    })
+    });
 
     return NextResponse.json({ schedule }, { status: 201 });
   } catch (error) {

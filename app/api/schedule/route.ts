@@ -3,16 +3,16 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { type NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 async function updateScheduleStatuses() {
   const now = new Date();
 
   await prisma.schedule.updateMany({
     where: {
-      endTime: { lt: now }, 
-      attended: true,       
-      status: { not: "completed" }, 
+      endTime: { lt: now },
+      attended: true,
+      status: { not: "completed" },
     },
     data: { status: "completed" },
   });
@@ -22,7 +22,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "TRAINER")) {
+    if (
+      !session ||
+      (session.user.role !== "ADMIN" &&
+        session.user.role !== "SUPER_ADMIN" &&
+        session.user.role !== "TRAINER")
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -58,10 +63,7 @@ export async function GET(request: NextRequest) {
       },
       skip,
       take: limit,
-      orderBy: [
-        { date: "desc" },      
-        { startTime: "asc" }, 
-      ],
+      orderBy: [{ date: "desc" }, { startTime: "asc" }],
     });
 
     const total = await prisma.schedule.count({ where: whereClause });
@@ -70,12 +72,14 @@ export async function GET(request: NextRequest) {
       schedules,
       totalPages: Math.ceil(total / limit),
     });
-
   } catch (error) {
     console.error("Error fetching schedules:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "An unknown error occurred" },
-      { status: 500 },
+      {
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      },
+      { status: 500 }
     );
   }
 }
@@ -89,10 +93,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { date, startTime, endTime, scheduleSubject, scheduleDescription, userId, trainerId } = body;
+    const {
+      date,
+      startTime,
+      endTime,
+      scheduleSubject,
+      scheduleDescription,
+      userId,
+      trainerId,
+    } = body;
 
-    if (!date || !startTime || !endTime || !scheduleSubject || !userId || !trainerId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (
+      !date ||
+      !startTime ||
+      !endTime ||
+      !scheduleSubject ||
+      !userId ||
+      !trainerId
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     const combineDateAndTime = (dateStr: string, timeStr: string) => {
@@ -101,12 +123,12 @@ export async function POST(request: Request) {
 
     const schedule = await prisma.schedule.create({
       data: {
-        date: new Date(date), 
+        date: new Date(date),
         startTime: combineDateAndTime(date, startTime),
         endTime: combineDateAndTime(date, endTime),
         scheduleSubject,
         scheduleDescription,
-        status: "pending", 
+        status: "pending",
         userId,
         trainerId,
       },
@@ -120,7 +142,7 @@ export async function POST(request: Request) {
         error: "An error occurred while creating the schedule",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

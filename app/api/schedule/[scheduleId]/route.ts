@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { type NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 type RouteContext = {
   params: Promise<{
@@ -22,7 +22,7 @@ export async function PUT(request: Request, context: RouteContext) {
     }
 
     const updateData: any = {};
- 
+
     if (body.date) updateData.date = new Date(body.date);
     if (body.startTime) updateData.startTime = new Date(body.startTime);
     if (body.endTime) updateData.endTime = new Date(body.endTime);

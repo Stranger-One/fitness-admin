@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface AdminContextType {
+  loader: boolean;
   userStats: UserStats;
   trainerStats: TrainerStats;
   sessionsStats: SessionsStats;
@@ -33,6 +34,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     pendingSessions: 0,
     completionRate: 0,
   });
+  const [loader, setLoader] = useState(true)
 
   const {data} = useSession()
   const user = data?.user
@@ -54,6 +56,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
             sessionsStatsResponse.json(),
           ]);
 
+        setLoader(false)
         setUserStats(userStatsData);
         setTrainerStats(trainerStatsData);
         setSessionsStats(sessionsStatsData);
@@ -66,6 +69,7 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user?.role]);
 
   const value = {
+    loader,
     userStats,
     trainerStats,
     sessionsStats,

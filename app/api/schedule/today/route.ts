@@ -3,17 +3,14 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
     const decoded = await getServerSession(authOptions);
 
     if (!decoded) {
-      return NextResponse.json(
-        { error: "Invalid user" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Invalid user" }, { status: 403 });
     }
 
     const today = new Date();

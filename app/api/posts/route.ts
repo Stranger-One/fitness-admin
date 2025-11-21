@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import { client as sanityClient } from "@/sanity/lib/client"
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { client as sanityClient } from "@/sanity/lib/client";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 interface SanityPost {
-  _id: string
-  title: string
+  _id: string;
+  title: string;
   author: {
-    name: string
-    image: string
-  }
-  body: any[] // Sanity block content type
-  publishedAt: string
+    name: string;
+    image: string;
+  };
+  body: any[]; // Sanity block content type
+  publishedAt: string;
 }
 
 export async function GET() {
@@ -22,8 +22,8 @@ export async function GET() {
     author->{name, image},
     body,
     publishedAt
-  }`
-  const posts: SanityPost[] = await sanityClient.fetch(query)
+  }`;
+  const posts: SanityPost[] = await sanityClient.fetch(query);
 
   const postsWithLikes = await Promise.all(
     posts.map(async (post: SanityPost) => ({
@@ -31,8 +31,8 @@ export async function GET() {
       likes: await prisma.like.count({
         where: { postId: post._id },
       }),
-    })),
-  )
+    }))
+  );
 
-  return NextResponse.json(postsWithLikes)
+  return NextResponse.json(postsWithLikes);
 }

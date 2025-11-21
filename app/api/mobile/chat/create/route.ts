@@ -1,26 +1,26 @@
-import { authMiddleware } from "@/middleware"
-import { PrismaClient } from "@prisma/client"
-import type { JwtPayload } from "jsonwebtoken"
-import { NextRequest, NextResponse } from "next/server"
+import { authMiddleware } from "@/middleware";
+import { PrismaClient } from "@prisma/client";
+import type { JwtPayload } from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
     const decoded = (await authMiddleware(request)) as JwtPayload & {
-      id: string
-    }
-    const { trainerId } = await request.json()
+      id: string;
+    };
+    const { trainerId } = await request.json();
 
     // Check for existing chat
     const existingChat = await prisma.chat.findFirst({
       where: {
         AND: [{ userId: decoded.id }, { trainerId }],
       },
-    })
+    });
 
     if (existingChat) {
-      return NextResponse.json({ chat: existingChat })
+      return NextResponse.json({ chat: existingChat });
     }
 
     // Create new chat
@@ -29,13 +29,16 @@ export async function POST(request: NextRequest) {
         userId: decoded.id,
         trainerId,
       },
-    })
+    });
 
-    return NextResponse.json({ chat })
+    return NextResponse.json({ chat });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "An unknown error occurred" },
-      { status: 500 },
-    )
+      {
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      },
+      { status: 500 }
+    );
   }
 }

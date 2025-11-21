@@ -1,27 +1,37 @@
-import { authOptions } from "@/lib/auth.config"
-import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { authOptions } from "@/lib/auth.config";
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (
       !session ||
-      (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN" && session.user.role !== "TRAINER")
+      (session.user.role !== "ADMIN" &&
+        session.user.role !== "SUPER_ADMIN" &&
+        session.user.role !== "TRAINER")
     ) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const totalUsers = await prisma.user.count({ where: { role: "USER" } })
-    const activeUsers = await prisma.user.count({ where: { role: "USER", status: "ACTIVE" } })
-    const inactiveUsers = await prisma.user.count({ where: { role: "USER", status: "INACTIVE" } })
+    const totalUsers = await prisma.user.count({ where: { role: "USER" } });
+    const activeUsers = await prisma.user.count({
+      where: { role: "USER", status: "ACTIVE" },
+    });
+    const inactiveUsers = await prisma.user.count({
+      where: { role: "USER", status: "INACTIVE" },
+    });
 
-    const currentDate = new Date()
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
     const newUsers = await prisma.user.count({
       where: {
         role: "USER",
@@ -29,14 +39,14 @@ export async function GET() {
           gte: firstDayOfMonth,
         },
       },
-    })
+    });
 
     return NextResponse.json({
       totalUsers,
       activeUsers,
       inactiveUsers,
       newUsers,
-    })
+    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -44,6 +54,6 @@ export async function GET() {
           error instanceof Error ? error.message : "An unknown error occurred",
       },
       { status: 500 }
-    )
+    );
   }
 }

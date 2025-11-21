@@ -1,16 +1,16 @@
-import { getServerSession } from "next-auth/next"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth.config"
-import { PrismaClient } from "@prisma/client"
-import ChatList from "@/components/pages/trainer/chats/ChatList"
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth.config";
+import { PrismaClient } from "@prisma/client";
+import ChatList from "@/components/pages/trainer/chats/ChatList";
 
-const prisma = new PrismaClient()
+import prisma from "@/lib/prisma";
 
 export default async function TrainerChats() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/signin")
+    redirect("/signin");
   }
 
   const chats = await prisma.chat.findMany({
@@ -35,12 +35,12 @@ export default async function TrainerChats() {
     orderBy: {
       updatedAt: "desc",
     },
-  })
+  });
 
   return (
     <div className="space-y-6 p-2 lg:ml-64">
       <h1 className="text-3xl font-bold mb-6">Your Chats</h1>
       <ChatList chats={chats} />
     </div>
-  )
+  );
 }
