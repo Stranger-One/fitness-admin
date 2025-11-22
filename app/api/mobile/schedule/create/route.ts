@@ -21,9 +21,10 @@ export async function POST(request: NextRequest) {
       scheduleSubject,
       scheduleDescription,
       sessionType,
+      trainerId,
     } = body;
 
-    if (!date || !startTime || !endTime || !scheduleSubject) {
+    if (!date || !startTime || !endTime || !scheduleSubject || !trainerId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
         sessionType,
         status: "requested",
         userId: decoded.id,
-        trainerId: "cm7t9otkb0001jr03ffoittep",
+        trainerId: trainerId,
       },
     });
 
